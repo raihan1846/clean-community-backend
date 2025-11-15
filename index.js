@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -44,6 +44,15 @@ app.get('/', (req, res) => {
         const allIssues = req.body;
         console.log('hitting the users post api..!!!', allIssues);
         const result = await allIssuesCollection.insertOne(allIssues);
+        res.send(result);
+    })
+    
+
+    // Delete issue 
+    app.delete('/all-issues/:id', async (req, res)=>{
+        const id = req.params.id;
+        const query = {_id : new ObjectId(id)};
+        const result = await allIssuesCollection.deleteOne(query);
         res.send(result);
     })
 
