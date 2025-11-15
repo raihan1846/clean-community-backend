@@ -42,11 +42,21 @@ async function run() {
         })
 
         //  all issue 
+        // app.get('/all-issues', async (req, res) => {
+        //     const cursor = allIssuesCollection.find();
+        //     const result = await cursor.toArray();
+        //     res.send(result);
+        // })
         app.get('/all-issues', async (req, res) => {
-            const cursor = allIssuesCollection.find();
-            const result = await cursor.toArray();
+            const email = req.query.email; 
+            let query = {};
+            if (email) {
+                query = { email: email };
+            }
+            const result = await allIssuesCollection.find(query).toArray();
             res.send(result);
-        })
+        });
+        
 
         // add issue 
         app.post('/all-issues', async (req, res) => {
