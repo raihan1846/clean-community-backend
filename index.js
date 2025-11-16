@@ -65,6 +65,14 @@ async function run() {
             const result = await allIssuesCollection.insertOne(allIssues);
             res.send(result);
         })
+
+        // latest issue 
+        app.get('/latest-issues', async (req,res)=>{
+            const cursor = allIssuesCollection.find().sort({created_at: -1}).limit(6);
+            const result = await cursor.toArray();
+            res.send(result);
+          })
+
         // find 1 issue 
 
         app.get('/all-issues/:id', async (req, res) => {
