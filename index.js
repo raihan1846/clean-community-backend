@@ -63,6 +63,31 @@ async function run() {
             }
         });
 
+         // total status users
+         app.get('/issues-status-count', async (req, res) => {
+            try {
+                const result = await allIssuesCollection.aggregate([
+                    {
+                        $group: {
+                            _id: "$status",
+                            count: { $sum: 1 }
+                        }
+                    }
+                ]).toArray();
+        
+                // Convert array to object for easy frontend use
+                const statusCounts = {};
+                result.forEach(item => {
+                    statusCounts[item._id] = item.count;
+                });
+        
+                res.send(statusCounts);
+        
+            } catch (error) {
+                res.status(500).send({ error: error.message });
+            }
+        });
+        
 
         //  all issue 
         // app.get('/all-issues', async (req, res) => {
