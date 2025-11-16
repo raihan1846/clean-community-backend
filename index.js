@@ -34,12 +34,35 @@ async function run() {
 
 
         //   add user
+        // app.post('/users', async (req, res) => {
+        //     const newUser = req.body;
+        //     console.log('hitting the users post api..!!!', newUser);
+        //     const result = await userCollection.insertOne(newUser);
+        //     res.send(result);
+        // })
         app.post('/users', async (req, res) => {
             const newUser = req.body;
-            console.log('hitting the users post api..!!!', newUser);
+        
+            const existingUser = await userCollection.findOne({ email: newUser.email });
+        
+            if (existingUser) {
+                return res.send({ message: "User already exists", inserted: false });
+            }
+        
             const result = await userCollection.insertOne(newUser);
-            res.send(result);
-        })
+            res.send({ message: "User added", inserted: true, result });
+        });
+        
+        // total registered users
+        app.get('/user-count', async (req, res) => {
+            try {
+                const count = await userCollection.countDocuments();
+                res.send({ count });
+            } catch (error) {
+                res.status(500).send({ error: error.message });
+            }
+        });
+
 
         //  all issue 
         // app.get('/all-issues', async (req, res) => {
@@ -61,7 +84,7 @@ async function run() {
         // add issue 
         app.post('/all-issues', async (req, res) => {
             const allIssues = req.body;
-            console.log('hitting the users post api..!!!', allIssues);
+            allIssues.created_at = new Date();
             const result = await allIssuesCollection.insertOne(allIssues);
             res.send(result);
         })
