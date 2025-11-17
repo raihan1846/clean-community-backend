@@ -42,17 +42,17 @@ async function run() {
         // })
         app.post('/users', async (req, res) => {
             const newUser = req.body;
-        
+
             const existingUser = await userCollection.findOne({ email: newUser.email });
-        
+
             if (existingUser) {
                 return res.send({ message: "User already exists", inserted: false });
             }
-        
+
             const result = await userCollection.insertOne(newUser);
             res.send({ message: "User added", inserted: true, result });
         });
-        
+
         // total registered users
         app.get('/user-count', async (req, res) => {
             try {
@@ -63,8 +63,8 @@ async function run() {
             }
         });
 
-         // total status users
-         app.get('/issues-status-count', async (req, res) => {
+        // total status users
+        app.get('/issues-status-count', async (req, res) => {
             try {
                 const result = await allIssuesCollection.aggregate([
                     {
@@ -74,29 +74,24 @@ async function run() {
                         }
                     }
                 ]).toArray();
-        
+
                 // Convert array to object for easy frontend use
                 const statusCounts = {};
                 result.forEach(item => {
                     statusCounts[item._id] = item.count;
                 });
-        
+
                 res.send(statusCounts);
-        
+
             } catch (error) {
                 res.status(500).send({ error: error.message });
             }
         });
-        
 
-        //  all issue 
-        // app.get('/all-issues', async (req, res) => {
-        //     const cursor = allIssuesCollection.find();
-        //     const result = await cursor.toArray();
-        //     res.send(result);
-        // })
+
+
         app.get('/all-issues', async (req, res) => {
-            const email = req.query.email; 
+            const email = req.query.email;
             let query = {};
             if (email) {
                 query = { email: email };
@@ -104,7 +99,7 @@ async function run() {
             const result = await allIssuesCollection.find(query).toArray();
             res.send(result);
         });
-        
+
 
         // add issue 
         app.post('/all-issues', async (req, res) => {
@@ -115,11 +110,11 @@ async function run() {
         })
 
         // latest issue 
-        app.get('/latest-issues', async (req,res)=>{
-            const cursor = allIssuesCollection.find().sort({created_at: -1}).limit(6);
+        app.get('/latest-issues', async (req, res) => {
+            const cursor = allIssuesCollection.find().sort({ created_at: -1 }).limit(6);
             const result = await cursor.toArray();
             res.send(result);
-          })
+        })
 
         // find 1 issue 
 
@@ -153,12 +148,33 @@ async function run() {
 
 
         // contribution part start 
-        //  all contribution 
         app.get('/all-contribution', async (req, res) => {
             const cursor = allContributionCollection.find();
             const result = await cursor.toArray();
             res.send(result);
         })
+
+        app.get('/my-contribution/:issueId', async (req, res) => {
+            try {
+                const issueId = req.params.issueId;
+                const email = req.query.email;
+
+                if (!email) {
+                    return res.status(400).json({ error: "Email is required" });
+                }
+
+                const contribution = await allContributionCollection.findOne({
+                    issueId: issueId,  
+                    email: email
+                });
+
+                res.json(contribution || null);   
+
+            } catch (error) {
+                console.error("Error in /my-contribution:", error);
+                res.status(500).json({ error: "Server error" });
+            }
+        });
 
         // add contribution 
         app.post('/all-contribution', async (req, res) => {
